@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/jobs")
+      .get("https://job-sphere-67rc.vercel.app/api/jobs")
       .then((res) => {
         const jobs = Array.isArray(res.data) ? res.data : res.data.jobs || [];
         setFeaturedJobs(jobs.slice(0, 3));

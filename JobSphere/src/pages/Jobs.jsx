@@ -13,7 +13,7 @@ export default function Jobs() {
     setLoading(true);
     setError("");
 
-    const url = "http://localhost:5000/api/jobs";
+    const url = "https://job-sphere-67rc.vercel.app/api/jobs";
     const params = {};
 
     if (filters.search?.trim()) {
