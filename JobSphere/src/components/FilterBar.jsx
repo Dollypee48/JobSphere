@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function FilterBar({ onFilter }) {
   const [search, setSearch] = useState("");
@@ -9,19 +10,23 @@ export default function FilterBar({ onFilter }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-white rounded-lg shadow p-4 mb-6 flex flex-col md:flex-row gap-4 items-center"
+    >
       <input
         type="text"
         placeholder="Search jobs (e.g. React, UI, Marketing)"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="border px-4 py-2 rounded w-full md:w-1/2"
+        className="border border-gray-300 px-4 py-2 rounded w-full md:w-1/2 focus:outline-blue-500 text-black"
       />
 
       <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        className="border px-4 py-2 rounded w-full md:w-1/4"
+        className="border border-gray-300 px-4 py-2 rounded w-full md:w-1/4 focus:outline-blue-500 text-black"
       >
         <option value="">All Categories</option>
         <option value="software-dev">Software Development</option>
@@ -41,6 +46,6 @@ export default function FilterBar({ onFilter }) {
       >
         Apply
       </button>
-    </div>
+    </motion.div>
   );
 }

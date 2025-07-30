@@ -7,9 +7,9 @@ let cachedJobs = [];
 
 router.get("/", async (req, res) => {
   try {
-    const { search = "", category = "", country = "" } = req.query;
+    const { search = "", category = "" } = req.query;
 
-    // Fetch from Arbeitnow
+    
     const arbeitRes = await fetch("https://www.arbeitnow.com/api/job-board-api");
     const arbeitData = await arbeitRes.json();
     const arbeitJobs = arbeitData.data.map((job) => ({
@@ -23,11 +23,10 @@ router.get("/", async (req, res) => {
       description: job.description || "",
       category: job.job_types ? job.job_types[0] : "General",
       job_type: job.job_types ? job.job_types[0] : "Full Time",
-      country: job.location?.split(",").pop()?.trim() || "Unknown",
       source: "Arbeitnow",
     }));
 
-    // Fetch from RemoteOK
+    
     const remoteRes = await fetch("https://remoteok.io/api", {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
@@ -44,19 +43,18 @@ router.get("/", async (req, res) => {
       description: job.description || job.description_html || "",
       category: job.category || "General",
       job_type: job.job_type || "Remote",
-      country: "Remote", // Default country value
       source: "RemoteOK",
     }));
 
+   
     const allJobs = [...arbeitJobs, ...remoteJobs];
     cachedJobs = allJobs;
 
-    // Apply filters: search, category, and country
+ 
     const filteredJobs = allJobs.filter((job) => {
       const title = job.title?.toLowerCase() || "";
       const company = job.company?.toLowerCase() || "";
-      const tags = job.tags?.map((tag) => tag.toLowerCase()) || [];
-      const jobCountry = job.country?.toLowerCase() || "";
+      const tags = job.tags?.map(tag => tag.toLowerCase()) || [];
 
       const matchesSearch =
         title.includes(search.toLowerCase()) ||
@@ -66,11 +64,7 @@ router.get("/", async (req, res) => {
         ? tags.includes(category.toLowerCase()) || job.category?.toLowerCase() === category.toLowerCase()
         : true;
 
-      const matchesCountry = country
-        ? jobCountry.includes(country.toLowerCase())
-        : true;
-
-      return matchesSearch && matchesCategory && matchesCountry;
+      return matchesSearch && matchesCategory;
     });
 
     res.status(200).json({ jobs: filteredJobs });
@@ -80,7 +74,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get job by ID
+
 router.get("/:id", (req, res) => {
   const job = cachedJobs.find((j) => j.id === req.params.id);
   if (!job) {

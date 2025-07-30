@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
+
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -17,7 +17,7 @@ function App() {
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/job/:id" element={<JobDetails />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+        
         </Routes>
       </main>
       <Footer />
