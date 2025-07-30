@@ -14,9 +14,8 @@ export default function JobDetails() {
       setError("");
       try {
         const jobData = await fetchJobById(id);
-        if (!jobData) {
-          throw new Error("Job not found");
-        }
+        console.log("Fetched job:", jobData);
+        if (!jobData) throw new Error("Job not found");
         setJob(jobData);
       } catch (err) {
         console.error(err);
@@ -25,45 +24,38 @@ export default function JobDetails() {
         setLoading(false);
       }
     };
-
     loadJob();
   }, [id]);
 
-  if (loading) {
-    return <p className="p-6 text-center text-gray-500 animate-pulse">Loading job details...</p>;
-  }
-
-  if (error) {
-    return <p className="p-6 text-center text-red-500">{error}</p>;
-  }
-
-  if (!job) {
-    return <p className="p-6 text-center text-gray-500">Job not found.</p>;
-  }
+  if (loading) return <p className="p-6 text-center text-gray-500 animate-pulse">Loading job details...</p>;
+  if (error) return <p className="p-6 text-center text-red-500">{error}</p>;
+  if (!job) return <p className="p-6 text-center text-gray-500">Job not found.</p>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-3">{job.title}</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-3">{job.title || "Untitled Job"}</h2>
 
       <div className="flex flex-wrap justify-between text-sm text-gray-600 mb-6">
         <p>
-          <span className="font-semibold">{job.company_name}</span> • {job.category}
+          <span className="font-semibold">{job.company || "Unknown Company"}</span> • {job.category || "N/A"}
         </p>
-        <p>{job.job_type} • {job.candidate_required_location}</p>
+        <p>{job.job_type || "Type N/A"} • {job.location || "Location N/A"}</p>
       </div>
 
       <div
         className="prose prose-slate max-w-none text-gray-700"
-        dangerouslySetInnerHTML={{ __html: job.description }}
+        dangerouslySetInnerHTML={{
+          __html: job.description || "<p>No description available.</p>",
+        }}
       />
 
       <a
-        href={job.url}
+        href={job.url || "#"}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-8 inline-block bg-blue-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-blue-700 transition"
       >
-        Apply on {job.company_name}
+        Apply on {job.company || "Company Website"}
       </a>
     </div>
   );
