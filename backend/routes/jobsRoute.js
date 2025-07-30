@@ -9,10 +9,10 @@ router.get("/", async (req, res) => {
   try {
     const { search = "", category = "" } = req.query;
 
-    
+   
     const arbeitRes = await fetch("https://www.arbeitnow.com/api/job-board-api");
     const arbeitData = await arbeitRes.json();
-    const arbeitJobs = arbeitData.data.map((job) => ({
+    const arbeitJobs = (arbeitData.data || []).map((job) => ({
       id: uuidv4(),
       title: job.title || "",
       company: job.company_name || "",
@@ -21,17 +21,15 @@ router.get("/", async (req, res) => {
       remote: job.remote || false,
       tags: job.tags || [],
       description: job.description || "",
-      category: job.job_types ? job.job_types[0] : "General",
-      job_type: job.job_types ? job.job_types[0] : "Full Time",
+      category: job.job_types?.[0] || "General",
+      job_type: job.job_types?.[0] || "Full Time",
       source: "Arbeitnow",
     }));
 
-    
     const remoteRes = await fetch("https://remoteok.io/api", {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
     const remoteData = await remoteRes.json();
-
     const remoteJobs = (Array.isArray(remoteData) ? remoteData.slice(1) : []).map((job) => ({
       id: uuidv4(),
       title: job.position || job.title || "",
@@ -48,21 +46,21 @@ router.get("/", async (req, res) => {
 
    
     const allJobs = [...arbeitJobs, ...remoteJobs];
-    cachedJobs = allJobs;
-
- 
+    cachedJobs = allJobs; 
+   
     const filteredJobs = allJobs.filter((job) => {
       const title = job.title?.toLowerCase() || "";
       const company = job.company?.toLowerCase() || "";
-      const tags = job.tags?.map(tag => tag.toLowerCase()) || [];
+      const tags = (job.tags || []).map((tag) => tag.toLowerCase());
+      const categoryLower = category.toLowerCase();
 
       const matchesSearch =
-        title.includes(search.toLowerCase()) ||
-        company.includes(search.toLowerCase());
+        title.includes(search.toLowerCase()) || company.includes(search.toLowerCase());
 
-      const matchesCategory = category
-        ? tags.includes(category.toLowerCase()) || job.category?.toLowerCase() === category.toLowerCase()
-        : true;
+      const matchesCategory =
+        !category ||
+        tags.includes(categoryLower) ||
+        job.category?.toLowerCase() === categoryLower;
 
       return matchesSearch && matchesCategory;
     });
@@ -73,7 +71,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch jobs" });
   }
 });
-
 
 router.get("/:id", (req, res) => {
   const job = cachedJobs.find((j) => j.id === req.params.id);
