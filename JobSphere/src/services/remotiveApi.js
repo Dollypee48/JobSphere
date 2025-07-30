@@ -1,5 +1,10 @@
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "/api"
+    : "https://job-sphere-67rc.vercel.app/api";
+
 export const fetchJobs = async (searchTerm = "", category = "") => {
-  const url = `/api/jobs?search=${encodeURIComponent(searchTerm)}&category=${encodeURIComponent(category)}`;
+  const url = `${BASE_URL}/jobs?search=${encodeURIComponent(searchTerm)}&category=${encodeURIComponent(category)}`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch jobs");
@@ -12,7 +17,7 @@ export const fetchJobs = async (searchTerm = "", category = "") => {
 };
 
 export const fetchJobById = async (id) => {
-  const url = `/api/jobs/${encodeURIComponent(id)}`;
+  const url = `${BASE_URL}/jobs/${encodeURIComponent(id)}`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("Job not found");
