@@ -3,13 +3,14 @@ import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
-let cachedJobs = [];
+let cachedJobs = []; 
+
 
 router.get("/", async (req, res) => {
   try {
     const { search = "", category = "" } = req.query;
 
-   
+    // Fetch from Arbeitnow
     const arbeitRes = await fetch("https://www.arbeitnow.com/api/job-board-api");
     const arbeitData = await arbeitRes.json();
     const arbeitJobs = (arbeitData.data || []).map((job) => ({
@@ -26,6 +27,7 @@ router.get("/", async (req, res) => {
       source: "Arbeitnow",
     }));
 
+    // Fetch from RemoteOK
     const remoteRes = await fetch("https://remoteok.io/api", {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
@@ -44,23 +46,23 @@ router.get("/", async (req, res) => {
       source: "RemoteOK",
     }));
 
-   
     const allJobs = [...arbeitJobs, ...remoteJobs];
-    cachedJobs = allJobs; 
+    cachedJobs = allJobs;
    
     const filteredJobs = allJobs.filter((job) => {
-      const title = job.title?.toLowerCase() || "";
-      const company = job.company?.toLowerCase() || "";
-      const tags = (job.tags || []).map((tag) => tag.toLowerCase());
+      const title = job.title.toLowerCase();
+      const company = job.company.toLowerCase();
+      const tags = job.tags.map((tag) => tag.toLowerCase());
+      const searchTerm = search.toLowerCase();
       const categoryLower = category.toLowerCase();
 
       const matchesSearch =
-        title.includes(search.toLowerCase()) || company.includes(search.toLowerCase());
+        title.includes(searchTerm) || company.includes(searchTerm);
 
       const matchesCategory =
         !category ||
         tags.includes(categoryLower) ||
-        job.category?.toLowerCase() === categoryLower;
+        (job.category || "").toLowerCase() === categoryLower;
 
       return matchesSearch && matchesCategory;
     });
@@ -71,6 +73,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch jobs" });
   }
 });
+
 
 router.get("/:id", (req, res) => {
   const job = cachedJobs.find((j) => j.id === req.params.id);
